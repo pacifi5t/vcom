@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include <memory>
+#include <algorithm>
 
 #include "TreeNode.hpp"
 
@@ -30,7 +31,11 @@ public:
     shared_ptr<TreeNode> getNode(char symbol);
     void updateNode(shared_ptr<TreeNode> node, int weight);
     void addNodeToMap(shared_ptr<TreeNode> node, int weight);
+    void editListPosition(shared_ptr<TreeNode> node, int index_from_end, int weight);
+    void swapNodes(shared_ptr<TreeNode> first_node, shared_ptr<TreeNode> second_node);
     bool isRoot(shared_ptr<TreeNode> node);
+    bool isHighestInWeightList(shared_ptr<TreeNode> node);
+    bool isSecondHighestInWeightList(shared_ptr<TreeNode> node);
 };
 
 AdaptiveTree::AdaptiveTree()
@@ -170,4 +175,104 @@ shared_ptr<TreeNode> AdaptiveTree::createNode(char symbol)
     NYTNode->setParent(new_parent_node);
     nodeMap[symbol] = new_node;
     return new_node;
+}
+
+void AdaptiveTree::updateNode(shared_ptr<TreeNode> node, int weight)
+{
+    list<shared_ptr<TreeNode>> list_to_edit;
+
+    if(isRoot(node->getParent()))
+    {
+        if(!isHighestInWeightList(node))
+        {
+            editListPosition(node, 0, weight);
+        }
+        else
+        {
+            nodeWeightLists[node->getWeight()].pop_back();
+            addNodeToMap(node, node->getWeight() + 1);
+        }
+    }
+    else if(!isHighestInWeightList(node) && !isHighestInWeightList(node->getParent()))
+    {
+        editListPosition(node, 0, weight);
+    }
+    else if(isHighestInWeightList(node->getParent()) && !isSecondHighestInWeightList(node))
+    {
+        editListPosition(node, 1, weight);
+    }
+    else if(isHighestInWeightList(node->getParent()) && isSecondHighestInWeightList(node))
+    {
+        list_to_edit = nodeWeightLists[node->getWeight()];
+        list_to_edit.erase(((list_to_edit.end()--)--));
+        addNodeToMap(node, weight);
+    }
+    else
+    {
+        list<shared_ptr<TreeNode>> temp = nodeWeightLists[node->getWeight()];
+        temp.erase(temp.end());
+        addNodeToMap(node, weight);
+    }
+}
+
+void AdaptiveTree::editListPosition(shared_ptr<TreeNode> node, int index_from_end, int weight)
+{
+    list<shared_ptr<TreeNode>> new_list = nodeWeightLists[node->getWeight()];
+    auto highest_node_iter = new_list.end();
+
+    int i = 0;
+    while(i <= index_from_end)
+    {
+        highest_node_iter--;
+        i++;
+    }
+
+    auto pos_iter = std::find(new_list.begin(), new_list.end(), node);
+    shared_ptr<TreeNode> highest_node = *(new_list.erase(highest_node_iter));
+    new_list.insert(pos_iter, highest_node);
+    addNodeToMap(node, weight);
+    swapNodes(node, highest_node);
+}
+
+void AdaptiveTree::addNodeToMap(shared_ptr<TreeNode> node, int weight)
+{
+    list<shared_ptr<TreeNode>> new_list = nodeWeightLists[weight];
+    bool place_found = false;
+
+    if(&new_list == nullptr)
+    {
+        new_list = list<shared_ptr<TreeNode>>();
+        new_list.push_back(node);
+        nodeWeightLists.insert({weight, new_list});
+    }
+    else
+    {
+        if(new_list.size() == 0)
+        {
+            new_list.push_back(node);
+        }
+        else
+        {
+            auto iter = new_list.begin();
+            shared_ptr<TreeNode> current_node;
+            while(!place_found)
+            {
+                current_node = *iter;
+
+                if(current_node->getNodeId() > node->getNodeId())
+                {
+                    new_list.insert(iter, node);
+                    place_found = true;
+                }
+
+                iter++;
+
+                if(new_list.end() == iter)
+                {
+                    new_list.push_back(node);
+                    place_found = true;
+                }
+            }
+        }
+    }
 }
