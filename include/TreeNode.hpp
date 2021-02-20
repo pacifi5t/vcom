@@ -1,3 +1,5 @@
+#pragma once
+
 class TreeNode
 {
     /**
@@ -42,21 +44,13 @@ TreeNode::TreeNode(int id, TreeNode *left, TreeNode *right)
     weight = left->getWeight() + right->getWeight();
 }
 
-TreeNode::TreeNode(int node_id, char symb)
+TreeNode::TreeNode(int id, char symb)
 {
-    nodeId = node_id;
+    nodeId = id;
     symbol = symb;
     leftChild = nullptr;
     rightChild = nullptr;
-
-    if (symb)
-    {
-        weight = 1;
-    }
-    else
-    {
-        weight = 0;
-    }
+    weight = symb;
 }
 
 int TreeNode::getWeight()
