@@ -1,5 +1,9 @@
 #pragma once
 
+#include <memory>
+
+using std::shared_ptr;
+
 class TreeNode
 {
     /**
@@ -11,12 +15,12 @@ private:
     int weight;
     int nodeId;
     char symbol;
-    TreeNode *leftChild;
-    TreeNode *rightChild;
-    TreeNode *parentNode;
+    shared_ptr<TreeNode> leftChild;
+    shared_ptr<TreeNode> rightChild;
+    shared_ptr<TreeNode> parentNode;
 
 public:
-    TreeNode(int id, TreeNode *left, TreeNode *right);
+    TreeNode(int id, shared_ptr<TreeNode> left, shared_ptr<TreeNode> right);
     TreeNode(int id, char s);
 
     int getWeight();
@@ -25,17 +29,17 @@ public:
     void setNodeId(int id);
     char getSymbol();
     void setSymbol(char s);
-    TreeNode *getLeftChild();
-    void setLeftChild(TreeNode *child);
-    TreeNode *getRightChild();
-    void setRightChild(TreeNode *child);
-    TreeNode *getParent();
-    void setParent(TreeNode *parent);
+    shared_ptr<TreeNode> getLeftChild();
+    void setLeftChild(shared_ptr<TreeNode> child);
+    shared_ptr<TreeNode> getRightChild();
+    void setRightChild(shared_ptr<TreeNode> child);
+    shared_ptr<TreeNode> getParent();
+    void setParent(shared_ptr<TreeNode> parent);
 
     void incWeight();
 };
 
-TreeNode::TreeNode(int id, TreeNode *left, TreeNode *right)
+TreeNode::TreeNode(int id, shared_ptr<TreeNode> left, shared_ptr<TreeNode> right)
 {
     nodeId = id;
     symbol = 0;
@@ -83,32 +87,32 @@ void TreeNode::setSymbol(char s)
     symbol = s;
 }
 
-TreeNode *TreeNode::getLeftChild()
+shared_ptr<TreeNode> TreeNode::getLeftChild()
 {
     return leftChild;
 }
 
-void TreeNode::setLeftChild(TreeNode *child)
+void TreeNode::setLeftChild(shared_ptr<TreeNode> child)
 {
     leftChild = child;
 }
 
-TreeNode *TreeNode::getRightChild()
+shared_ptr<TreeNode> TreeNode::getRightChild()
 {
     return rightChild;
 }
 
-void TreeNode::setRightChild(TreeNode *child)
+void TreeNode::setRightChild(shared_ptr<TreeNode> child)
 {
     rightChild = child;
 }
 
-TreeNode *TreeNode::getParent()
+shared_ptr<TreeNode> TreeNode::getParent()
 {
     return parentNode;
 }
 
-void TreeNode::setParent(TreeNode *parent)
+void TreeNode::setParent(shared_ptr<TreeNode> parent)
 {
     parentNode = parent;
 }

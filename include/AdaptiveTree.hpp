@@ -3,20 +3,22 @@
 #include <list>
 #include <map>
 #include <string>
+#include <memory>
 
 #include "TreeNode.hpp"
 
 using std::list;
 using std::map;
+using std::shared_ptr;
 using std::string;
 
 class AdaptiveTree
 {
 private:
     int nextNodeId;
-    TreeNode *root, *NYTNode;
-    map<char, TreeNode *> nodeMap;
-    map<int, list<TreeNode *>> nodeWeightLists;
+    shared_ptr<TreeNode> root, NYTNode;
+    map<char, shared_ptr<TreeNode>> nodeMap;
+    map<int, list<shared_ptr<TreeNode>>> nodeWeightLists;
 
 public:
     AdaptiveTree();
@@ -24,18 +26,19 @@ public:
 
     string getHuffmanCode(char symbol);
     void addSymbol(char symbol);
-    TreeNode *createNode(char symbol);
-    TreeNode *getNode(char symbol);
-    void updateNode(TreeNode *node, int weight);
-    void addNodeToMap(TreeNode *node, int weight);
-    bool isRoot(TreeNode *node);
+    shared_ptr<TreeNode> createNode(char symbol);
+    shared_ptr<TreeNode> getNode(char symbol);
+    void updateNode(shared_ptr<TreeNode> node, int weight);
+    void addNodeToMap(shared_ptr<TreeNode> node, int weight);
+    bool isRoot(shared_ptr<TreeNode> node);
 };
 
 AdaptiveTree::AdaptiveTree()
 {
-    TreeNode nyt(255, 0);
-    root = &nyt;
-    NYTNode = &nyt;
+    //TreeNode nyt(255, 0);
+    shared_ptr<TreeNode> nyt = std::make_shared<TreeNode>(255, 0);
+    root = nyt;
+    NYTNode = nyt;
     nextNodeId = 254;
 }
 
@@ -50,7 +53,7 @@ string AdaptiveTree::getHuffmanCode(char symbol)
 {
     string result;
     bool root_node_found = false;
-    TreeNode *current_node, *parent_node;
+    shared_ptr<TreeNode> current_node, parent_node;
 
     if (!symbol)
     {
@@ -88,7 +91,7 @@ string AdaptiveTree::getHuffmanCode(char symbol)
 
 void AdaptiveTree::addSymbol(char symbol)
 {
-    TreeNode *node_to_edit = getNode(symbol);
+    shared_ptr<TreeNode> node_to_edit = getNode(symbol);
     bool root_node_found = false;
 
     if (node_to_edit == nullptr)
@@ -114,7 +117,7 @@ void AdaptiveTree::addSymbol(char symbol)
         root_node_found = true;
     }
 
-    TreeNode *temp = node_to_edit;
+    shared_ptr<TreeNode> temp = node_to_edit;
 
     while (!root_node_found)
     {
@@ -138,33 +141,33 @@ void AdaptiveTree::addSymbol(char symbol)
     }
 }
 
-TreeNode *AdaptiveTree::createNode(char symbol)
+shared_ptr<TreeNode> AdaptiveTree::createNode(char symbol)
 {
-    TreeNode new_node(nextNodeId, symbol);
-    TreeNode new_parent_node(NYTNode->getNodeId(), NYTNode, &new_node);
+    shared_ptr<TreeNode> new_node = std::make_shared<TreeNode>(nextNodeId, symbol);
+    shared_ptr<TreeNode> new_parent_node = std::make_shared<TreeNode>(NYTNode->getNodeId(), NYTNode, new_node);
     nextNodeId -= 2;
-    NYTNode->setNodeId(new_parent_node.getNodeId() - 2);
-    new_node.setParent(&new_parent_node);
+    NYTNode->setNodeId(new_parent_node->getNodeId() - 2);
+    new_node->setParent(new_parent_node);
 
     if (NYTNode->getParent() != nullptr)
     {
         if (NYTNode->getParent()->getLeftChild() == NYTNode)
         {
-            NYTNode->getParent()->setLeftChild(&new_parent_node);
-            new_parent_node.setParent(NYTNode->getParent());
+            NYTNode->getParent()->setLeftChild(new_parent_node);
+            new_parent_node->setParent(NYTNode->getParent());
         }
         else if (NYTNode->getParent()->getRightChild() == NYTNode)
         {
-            new_parent_node.setParent(NYTNode->getParent());
-            NYTNode->getParent()->setRightChild(&new_parent_node);
+            new_parent_node->setParent(NYTNode->getParent());
+            NYTNode->getParent()->setRightChild(new_parent_node);
         }
     }
     else
     {
-        root = &new_parent_node;
+        root = new_parent_node;
     }
 
-    NYTNode->setParent(&new_parent_node);
-    nodeMap[symbol] = &new_node;
-    return &new_node;
+    NYTNode->setParent(new_parent_node);
+    nodeMap[symbol] = new_node;
+    return new_node;
 }
